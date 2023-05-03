@@ -1,0 +1,4 @@
+1. Adding Firebase to android
+2. Adding Firebase to Web
+3. firebase.initializeapp() -> android
+4. firebase.initializeapp(options: options) -> web
