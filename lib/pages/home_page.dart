@@ -107,9 +107,35 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             ListTile(
-              onTap: () {
-                logout();
-                nextScreenReplace(context, const LoginPage());
+              onTap: () async {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text("Logout"),
+                        content: const Text("Are you sure?"),
+                        actions: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            icon: const Icon(Icons.cancel_outlined),
+                            color: Colors.red,
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              logout();
+                              Navigator.of(context).pushAndRemoveUntil(
+                                  MaterialPageRoute(
+                                      builder: (context) => const LoginPage()),
+                                  (route) => false);
+                            },
+                            icon: const Icon(Icons.logout_outlined),
+                            color: Colors.teal,
+                          )
+                        ],
+                      );
+                    });
               },
               selectedColor: Colors.teal,
               selected: false,
@@ -124,6 +150,19 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+      body: groupList(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          popUpDialog(context);
+        },
+        elevation: 0,
+        backgroundColor: Colors.teal,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
+      ),
     );
   }
 
@@ -132,5 +171,13 @@ class _HomePageState extends State<HomePage> {
     await HelperFunctions.saveUserEmail("");
     await HelperFunctions.saveUserName("");
     auth.logout();
+  }
+
+  popUpDialog(BuildContext context) {
+
+  }
+
+  groupList(){
+    
   }
 }

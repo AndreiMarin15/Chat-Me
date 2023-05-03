@@ -37,7 +37,7 @@ class _ProfilePageState extends State<ProfilePage> {
       });
     });
   }
- 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
           children: <Widget>[
             const Icon(
               Icons.account_circle_outlined,
-              size: 150,
+              size: 120,
               color: Colors.teal,
             ),
             const SizedBox(
@@ -120,6 +120,51 @@ class _ProfilePageState extends State<ProfilePage> {
                 "Logout",
                 style: TextStyle(color: Colors.black),
               ),
+            ),
+          ],
+        ),
+      ),
+      body: Container(
+        padding: const EdgeInsets.symmetric(vertical: 170, horizontal: 40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.account_circle_outlined,
+              size: 200,
+              color: Colors.teal[700],
+            ),
+            const SizedBox(
+              height: 15,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Full Name",
+                  style: TextStyle(fontSize: 17),
+                ),
+                Text(
+                  userName,
+                  style: const TextStyle(fontSize: 17),
+                )
+              ],
+            ),
+            const Divider(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Email",
+                  style: TextStyle(fontSize: 17),
+                ),
+                Text(
+                  email,
+                  style: const TextStyle(fontSize: 17),
+                )
+              ],
             ),
           ],
         ),
