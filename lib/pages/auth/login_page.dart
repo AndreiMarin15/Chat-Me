@@ -19,14 +19,13 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final formKey = GlobalKey<FormState>();
-
-
-  
   String email = "";
   String password = "";
   bool _obscureText = true;
   bool _isLoading = false;
   AuthService auth = AuthService();
+
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
