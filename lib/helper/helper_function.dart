@@ -37,4 +37,14 @@ class HelperFunctions {
     SharedPreferences sp = await SharedPreferences.getInstance();
     return sp.getString(userEmailKey);
   }
+
+  static String getId(String res) {
+    // fron index 0 to index of "_"
+    return res.substring(0, res.indexOf("_"));
+  }
+
+  static String getName(String res) {
+    // from (index of "_" +) 1  to the last
+    return res.substring(res.indexOf("_") + 1);
+  }
 }

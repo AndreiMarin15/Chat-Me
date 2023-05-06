@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   Stream? groups;
   bool _isLoading = false;
   String groupName = "";
-  String _uid = FirebaseAuth.instance.currentUser!.uid;
+  final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   void initState() {
@@ -32,15 +32,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   // string manipulation to get group names and group ids
-  String getId(String res) {
-    // fron index 0 to index of "_"
-    return res.substring(0, res.indexOf("_"));
-  }
-
-  String getName(String res) {
-    // from (index of "_" +) 1  to the last
-    return res.substring(res.indexOf("_") + 1);
-  }
 
   gettingUserData() async {
     await HelperFunctions.getUserName().then((value) {
@@ -301,8 +292,10 @@ class _HomePageState extends State<HomePage> {
               itemBuilder: (context, index) {
                 int revIndex = snap.data['groups'].length - index - 1;
                 return GroupTile(
-                    groupId: getId(snap.data['groups'][revIndex]),
-                    groupName: getName(snap.data['groups'][revIndex]),
+                    groupId:
+                        HelperFunctions.getId(snap.data['groups'][revIndex]),
+                    groupName:
+                        HelperFunctions.getName(snap.data['groups'][revIndex]),
                     username: userName);
               },
             );

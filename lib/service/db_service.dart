@@ -59,4 +59,27 @@ class Database {
       "groups": FieldValue.arrayUnion(["${docRef.id}_$groupName"]),
     });
   }
+
+  // Getting the chat
+  getChats(String groupId) async {
+    return groups
+        .doc(groupId)
+        .collection("messages")
+        .orderBy("time")
+        .snapshots();
+  }
+
+  Future getGroupAdmin(String groupId) async {
+    DocumentReference docRef = groups.doc(groupId);
+    DocumentSnapshot documentSnapshot = await docRef.get();
+
+    return documentSnapshot['admin'];
+  }
+
+  // Getting group members
+
+  getGroupInfo(String groupId) async {
+    return groups.doc(groupId).snapshots();
+    
+  }
 }
