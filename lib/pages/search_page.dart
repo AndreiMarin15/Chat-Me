@@ -3,7 +3,6 @@ import 'package:chatapp_firebase/service/db_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -19,7 +18,7 @@ class _SearchPageState extends State<SearchPage> {
   bool _searchStarted = false;
   String userName = "";
   User user = FirebaseAuth.instance.currentUser!;
-  bool isJoined = false;
+ 
 
   @override
   void initState() {
@@ -138,26 +137,17 @@ class _SearchPageState extends State<SearchPage> {
                 searchSnapshot!.docs[index]['groupId'],
                 searchSnapshot!.docs[index]['groupName'],
                 HelperFunctions.getName(searchSnapshot!.docs[index]['admin']),
+                searchSnapshot!.docs[index]['members'],
               );
             },
           )
         : Container();
   }
 
-  userJoined(
-      String userName, String groupId, String groupName, String admin) async {
-    await Database(uid: user.uid)
-        .isUserJoined(groupName, groupId, userName)
-        .then((value) {
-      setState(() {
-        isJoined = value;
-      });
-    });
-  }
+  Widget groupTile(String userName, String groupId, String groupName,
+      String admin, List<dynamic> members) {
+    bool joined = members.contains("${user.uid}_$userName");
 
-  Widget groupTile(
-      String userName, String groupId, String groupName, String admin) {
-    userJoined(userName, groupId, groupName, admin);
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       leading: CircleAvatar(
@@ -174,8 +164,10 @@ class _SearchPageState extends State<SearchPage> {
       ),
       subtitle: Text("Admin: ${HelperFunctions.getName(admin)}"),
       trailing: InkWell(
-        onTap: () async {},
-        child: isJoined
+        onTap: () {
+          
+        },
+        child: joined
             ? Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
