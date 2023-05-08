@@ -80,6 +80,28 @@ class Database {
 
   getGroupInfo(String groupId) async {
     return groups.doc(groupId).snapshots();
-    
+  }
+
+  // search a group
+  // TODO: Implement RegEx Search
+  searchGroup(String grpName) async {
+    return groups
+        .where('groupName', isGreaterThanOrEqualTo: grpName)
+        .where('groupName', isLessThanOrEqualTo: '$grpName\uf8ff')
+        .get();
+  }
+
+  Future<bool> isUserJoined(
+      String groupName, String groupId, String userName) async {
+    DocumentReference docRef = users.doc(uid);
+    DocumentSnapshot docSnap = await docRef.get();
+
+    List<dynamic> group = await docSnap['groups'];
+
+    if (group.contains("${groupId}_$groupName")) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

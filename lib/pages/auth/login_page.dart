@@ -214,6 +214,7 @@ class _LoginPageState extends State<LoginPage> {
           await HelperFunctions.saveUserLoggedInStatus(true);
           await HelperFunctions.saveUserEmail(email);
           await HelperFunctions.saveUserName(snapshot.docs[0]['name']);
+
           nextScreenReplace(context, const HomePage());
         } else {
           showSnackbar(context, Colors.red, value);
@@ -221,7 +222,8 @@ class _LoginPageState extends State<LoginPage> {
             _isLoading = false;
           });
         }
-      });
+      }
+      );
     }
   }
 }
