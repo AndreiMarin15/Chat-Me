@@ -19,10 +19,21 @@ class _SearchPageState extends State<SearchPage> {
   String userName = "";
   User user = FirebaseAuth.instance.currentUser!;
 
+  List _allResults = [];
+
   @override
   void initState() {
     super.initState();
     getCurrentUserIdandName();
+    getClientStream();
+  }
+
+  getClientStream() async {
+    var data = await Database().groups.get();
+
+    setState(() {
+      _allResults = data.docs;
+    });
   }
 
   getCurrentUserIdandName() async {
@@ -48,66 +59,14 @@ class _SearchPageState extends State<SearchPage> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Container(
-            color: Colors.teal,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 15,
-              vertical: 10,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    onChanged: (value) {
-                      if (value.length > 2) {
-                        initiateSearch();
-                      }
-                    },
-                    controller: searchController,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      hintStyle: TextStyle(color: Colors.white70, fontSize: 16),
-                      hintText: "Search Groups...",
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    initiateSearch();
-                  },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.teal.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        initiateSearch();
-                      },
-                      icon: const Icon(Icons.search_rounded),
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          _isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.teal,
-                  ),
-                )
-              : groupList(),
-        ],
+      body: ListView.builder(
+        itemCount: _allResults.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(_allResults[index]['groupName']),
+            leading: ,
+          )
+        },
       ),
     );
   }
