@@ -2,6 +2,7 @@ import 'package:chatapp_firebase/helper/helper_function.dart';
 import 'package:chatapp_firebase/service/db_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class SearchPage extends StatefulWidget {
@@ -20,12 +21,18 @@ class _SearchPageState extends State<SearchPage> {
   User user = FirebaseAuth.instance.currentUser!;
 
   List _allResults = [];
+  List _resultList = [];
 
   @override
   void initState() {
     super.initState();
     getCurrentUserIdandName();
-    getClientStream();
+
+    searchController.addListener(onSearchChanged);
+  }
+
+  onSearchChanged() {
+    print(searchController.text);
   }
 
   getClientStream() async {
@@ -34,6 +41,19 @@ class _SearchPageState extends State<SearchPage> {
     setState(() {
       _allResults = data.docs;
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    searchController.removeListener(onSearchChanged);
+    searchController.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    getClientStream();
   }
 
   getCurrentUserIdandName() async {
@@ -50,24 +70,12 @@ class _SearchPageState extends State<SearchPage> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.teal,
-        title: const Text(
-          "Search",
-          style: TextStyle(
-            fontSize: 27,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+        title: CupertinoSearchTextField(
+          backgroundColor: Colors.white,
+          controller: searchController,
         ),
       ),
-      body: ListView.builder(
-        itemCount: _allResults.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(_allResults[index]['groupName']),
-            leading: ,
-          )
-        },
-      ),
+      body: groupList(),
     );
   }
 
@@ -90,17 +98,17 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   groupList() {
-    return _searchStarted && searchController.text.isNotEmpty
+    return _searchStarted
         ? ListView.builder(
             shrinkWrap: true,
-            itemCount: searchSnapshot!.docs.length,
+            itemCount: _allResults.length,
             itemBuilder: (context, index) {
               return groupTile(
                 userName,
-                searchSnapshot!.docs[index]['groupId'],
-                searchSnapshot!.docs[index]['groupName'],
-                HelperFunctions.getName(searchSnapshot!.docs[index]['admin']),
-                searchSnapshot!.docs[index]['members'],
+                _allResults[index]['groupId'],
+                _allResults[index]['groupName'],
+                HelperFunctions.getName(_allResults[index]['admin']),
+                _allResults[index]['members'],
               );
             },
           )
