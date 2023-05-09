@@ -91,6 +91,7 @@ class Database {
         .get();
   }
 
+// not needed but retain for future reference
   searchGrp(String grpName) async {
     return FirebaseFirestore.instance.collection("groups")
         .where('groupName', isGreaterThanOrEqualTo: grpName)
@@ -103,7 +104,7 @@ class Database {
     });
   }
 
-// to be deleted
+// not needed but retain for future reference
   Future<bool> isUserJoined(
       String groupName, String groupId, String userName) async {
     DocumentReference docRef = users.doc(uid);

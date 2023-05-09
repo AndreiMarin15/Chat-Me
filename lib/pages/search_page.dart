@@ -32,7 +32,33 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   onSearchChanged() {
-    print(searchController.text);
+    searchResultList();
+    setState(() {
+      if (searchController.text != "") {
+        _searchStarted = true;
+      } else {
+        _searchStarted = false;
+      }
+    });
+  }
+
+  searchResultList() {
+    var showResults = [];
+    if (searchController.text != "") {
+      for (var clientSnapshot in _allResults) {
+        var groupName = clientSnapshot['groupName'].toString().toLowerCase();
+
+        if (groupName.contains(searchController.text.toLowerCase())) {
+          showResults.add(clientSnapshot);
+        }
+      }
+    } else {
+      showResults = List.from(_allResults);
+    }
+
+    setState(() {
+      _resultList = showResults;
+    });
   }
 
   getClientStream() async {
@@ -41,6 +67,8 @@ class _SearchPageState extends State<SearchPage> {
     setState(() {
       _allResults = data.docs;
     });
+
+    searchResultList();
   }
 
   @override
@@ -75,7 +103,14 @@ class _SearchPageState extends State<SearchPage> {
           controller: searchController,
         ),
       ),
-      body: groupList(),
+      body: _isLoading
+          ? groupList()
+          : Container(
+            
+              child: const CircularProgressIndicator(
+                color: Colors.teal,
+              ),
+            ),
     );
   }
 
@@ -101,14 +136,14 @@ class _SearchPageState extends State<SearchPage> {
     return _searchStarted
         ? ListView.builder(
             shrinkWrap: true,
-            itemCount: _allResults.length,
+            itemCount: _resultList.length,
             itemBuilder: (context, index) {
               return groupTile(
                 userName,
-                _allResults[index]['groupId'],
-                _allResults[index]['groupName'],
-                HelperFunctions.getName(_allResults[index]['admin']),
-                _allResults[index]['members'],
+                _resultList[index]['groupId'],
+                _resultList[index]['groupName'],
+                HelperFunctions.getName(_resultList[index]['admin']),
+                _resultList[index]['members'],
               );
             },
           )
