@@ -18,7 +18,6 @@ class _SearchPageState extends State<SearchPage> {
   bool _searchStarted = false;
   String userName = "";
   User user = FirebaseAuth.instance.currentUser!;
- 
 
   @override
   void initState() {
@@ -62,7 +61,9 @@ class _SearchPageState extends State<SearchPage> {
                 Expanded(
                   child: TextField(
                     onChanged: (value) {
-                      initiateSearch();
+                      if (value.length > 2) {
+                        initiateSearch();
+                      }
                     },
                     controller: searchController,
                     style: const TextStyle(color: Colors.white),
@@ -96,6 +97,9 @@ class _SearchPageState extends State<SearchPage> {
               ],
             ),
           ),
+          const SizedBox(
+            height: 15,
+          ),
           _isLoading
               ? const Center(
                   child: CircularProgressIndicator(
@@ -127,7 +131,7 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   groupList() {
-    return _searchStarted
+    return _searchStarted && searchController.text.isNotEmpty
         ? ListView.builder(
             shrinkWrap: true,
             itemCount: searchSnapshot!.docs.length,
@@ -146,7 +150,7 @@ class _SearchPageState extends State<SearchPage> {
 
   Widget groupTile(String userName, String groupId, String groupName,
       String admin, List<dynamic> members) {
-    bool joined = members.contains("${user.uid}_$userName");
+    bool isJoined = members.contains("${user.uid}_$userName");
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -164,10 +168,8 @@ class _SearchPageState extends State<SearchPage> {
       ),
       subtitle: Text("Admin: ${HelperFunctions.getName(admin)}"),
       trailing: InkWell(
-        onTap: () {
-          
-        },
-        child: joined
+        onTap: () {},
+        child: isJoined
             ? Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
@@ -190,7 +192,7 @@ class _SearchPageState extends State<SearchPage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: const Text(
-                  "Join",
+                  "Join Now",
                   style: TextStyle(color: Colors.white),
                 ),
               ),
