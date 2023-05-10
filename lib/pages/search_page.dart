@@ -174,35 +174,45 @@ class _SearchPageState extends State<SearchPage> {
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Text("Admin: ${HelperFunctions.getName(admin)}"),
-      trailing: InkWell(
-        onTap: () {},
-        child: isJoined
-            ? Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.black,
-                  border: Border.all(color: Colors.white, width: 1),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: const Text(
-                  "Joined",
-                  style: TextStyle(color: Colors.white),
-                ),
-              )
-            : Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.teal,
-                  border: Border.all(color: Colors.white, width: 1),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: const Text(
-                  "Join Now",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
+      trailing: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return InkWell(
+            onTap: () {
+              setState(() {
+                isJoined = !isJoined;
+              });
+
+              print("Flutter: ${isJoined.toString()}");
+            },
+            child: isJoined
+                ? Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.black,
+                      border: Border.all(color: Colors.white, width: 1),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    child: const Text(
+                      "Joined",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
+                : Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.teal,
+                      border: Border.all(color: Colors.white, width: 1),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    child: const Text(
+                      "Join Now",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+          );
+        },
       ),
     );
   }
