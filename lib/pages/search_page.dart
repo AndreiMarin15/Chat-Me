@@ -15,7 +15,7 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   TextEditingController searchController = TextEditingController();
   bool _isLoading = false;
-  QuerySnapshot? searchSnapshot;
+  // QuerySnapshot? searchSnapshot;
   bool _searchStarted = false;
   String userName = "";
   User user = FirebaseAuth.instance.currentUser!;
@@ -62,11 +62,13 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   getClientStream() async {
-    var data = await Database().groups.get();
-
     setState(() {
-      _allResults = data.docs;
+      _isLoading = true;
     });
+    await Database().groups.get().then((value) => setState(() {
+          _isLoading = false;
+          _allResults = value.docs;
+        }));
 
     searchResultList();
   }
@@ -79,9 +81,12 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     super.didChangeDependencies();
-    getClientStream();
+    setState(() {
+      _isLoading = true;
+    });
+    await getClientStream();
   }
 
   getCurrentUserIdandName() async {
@@ -104,16 +109,16 @@ class _SearchPageState extends State<SearchPage> {
         ),
       ),
       body: _isLoading
-          ? groupList()
-          : Container(
-            
-              child: const CircularProgressIndicator(
+          ? const Center(
+              child: CircularProgressIndicator(
                 color: Colors.teal,
               ),
-            ),
+            )
+          : groupList(),
     );
   }
 
+  // not needed but retain for future reference
   initiateSearch() async {
     if (searchController.text.isNotEmpty) {
       setState(() {
@@ -124,7 +129,7 @@ class _SearchPageState extends State<SearchPage> {
           .searchGroup(searchController.text)
           .then((snapshot) {
         setState(() {
-          searchSnapshot = snapshot;
+          // searchSnapshot = snapshot;
           _isLoading = false;
           _searchStarted = true;
         });
