@@ -1,27 +1,29 @@
-import 'package:chatapp_firebase/helper/helper_function.dart';
-import 'package:chatapp_firebase/pages/auth/login_page.dart';
-import 'package:chatapp_firebase/pages/people_page.dart';
+import 'package:chatapp_firebase/pages/home_page.dart';
 import 'package:chatapp_firebase/pages/profile_page.dart';
 import 'package:chatapp_firebase/pages/search_page.dart';
-import 'package:chatapp_firebase/service/auth_service.dart';
-import 'package:chatapp_firebase/service/db_service.dart';
-import 'package:chatapp_firebase/widgets/group_tile.dart';
-import 'package:chatapp_firebase/widgets/widgets.dart';
+import 'package:chatapp_firebase/pages/search_person_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+import '../helper/helper_function.dart';
+import '../service/auth_service.dart';
+import '../service/db_service.dart';
+import '../widgets/person_tile.dart';
+import '../widgets/widgets.dart';
+import 'auth/login_page.dart';
+
+class PeoplePage extends StatefulWidget {
+  const PeoplePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<PeoplePage> createState() => _PeoplePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _PeoplePageState extends State<PeoplePage> {
   String userName = "";
   String email = "";
   AuthService auth = AuthService();
-  Stream? groups;
+  Stream? people;
   bool _isLoading = false;
   String groupName = "";
   final String _uid = FirebaseAuth.instance.currentUser!.uid;
@@ -31,8 +33,6 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     gettingUserData();
   }
-
-  // string manipulation to get group names and group ids
 
   gettingUserData() async {
     await HelperFunctions.getUserName().then((value) {
@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
         .getUserData()
         .then((snap) {
       setState(() {
-        groups = snap;
+        people = snap;
       });
     });
   }
@@ -63,14 +63,14 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
               onPressed: () {
-                nextScreen(context, const SearchPage());
+                nextScreen(context, const SearchPersonPage());
               },
               icon: const Icon(Icons.search)),
         ],
         elevation: 0,
         centerTitle: true,
         title: const Text(
-          "Groups",
+          "People",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 27),
         ),
         backgroundColor: Colors.teal,
@@ -99,9 +99,11 @@ class _HomePageState extends State<HomePage> {
               height: 2,
             ),
             ListTile(
-              onTap: () {},
+              onTap: () {
+                nextScreen(context, const HomePage());
+              },
               selectedColor: Colors.teal,
-              selected: true,
+              selected: false,
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
               leading: const Icon(Icons.group),
@@ -111,11 +113,9 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             ListTile(
-              onTap: () {
-                nextScreen(context, const PeoplePage());
-              },
+              onTap: () {},
               selectedColor: Colors.teal,
-              selected: false,
+              selected: true,
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
               leading: const Icon(Icons.chat_bubble_outline_rounded),
@@ -186,19 +186,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: groupList(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          popUpDialog(context);
-        },
-        elevation: 0,
-        backgroundColor: Colors.teal,
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 30,
-        ),
-      ),
+      body: peopleList(),
     );
   }
 
@@ -209,126 +197,39 @@ class _HomePageState extends State<HomePage> {
     auth.logout();
   }
 
-  popUpDialog(BuildContext context) {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return StatefulBuilder(
-            builder: ((context, setState) {
-              return AlertDialog(
-                title: const Text(
-                  "Create a Group",
-                  textAlign: TextAlign.left,
-                ),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _isLoading
-                        ? Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.teal[700],
-                            ),
-                          )
-                        : TextField(
-                            onChanged: (val) {
-                              setState(() {
-                                groupName = val;
-                              });
-                            },
-                            style: const TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    const BorderSide(color: Colors.teal),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              errorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.red[900]!),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.teal[700]!),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                          ),
-                  ],
-                ),
-                actions: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red[700],
-                    ),
-                    child: const Text("CANCEL"),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (groupName != "") {
-                        setState(() {
-                          _isLoading = true;
-                        });
-
-                        await Database(uid: _uid)
-                            .createGroup(userName, _uid, groupName)
-                            .whenComplete(() {
-                          setState(() {
-                            _isLoading = false;
-                          });
-                          Navigator.of(context).pop();
-                          showSnackbar(context, Colors.green,
-                              "Group: $groupName created successfully.");
-                        });
-                      } else {}
-                    },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal[700]),
-                    child: const Text("Create"),
-                  ),
-                ],
+  peopleList() {
+    return StreamBuilder(
+        stream: people,
+        builder: (context, AsyncSnapshot snap) {
+          if (snap.hasData) {
+            if (snap.data['conversations'].length != null &&
+                snap.data['conversations'].length != 0) {
+              return ListView.builder(
+                itemCount: snap.data['conversations'].length,
+                itemBuilder: (context, index) {
+                  int revIndex = snap.data['groups'].length - index - 1;
+                  return PersonTile(
+                    personId: HelperFunctions.getId(
+                        snap.data['conversations'][revIndex]),
+                    personName: HelperFunctions.getName(
+                        snap.data['conversations'][revIndex]),
+                  );
+                },
               );
-            }),
-          );
+            } else {
+              return noChatsWidget();
+            }
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Colors.teal,
+              ),
+            );
+          }
         });
   }
 
-  groupList() {
-    return StreamBuilder(
-      stream: groups,
-      builder: (context, AsyncSnapshot snap) {
-        if (snap.hasData) {
-          if (snap.data['groups'].length != null &&
-              snap.data['groups'].length != 0) {
-            return ListView.builder(
-              itemCount: snap.data['groups'].length,
-              itemBuilder: (context, index) {
-                int revIndex = snap.data['groups'].length - index - 1;
-                return GroupTile(
-                    groupId:
-                        HelperFunctions.getId(snap.data['groups'][revIndex]),
-                    groupName:
-                        HelperFunctions.getName(snap.data['groups'][revIndex]),
-                    username: userName);
-              },
-            );
-          } else {
-            return noGroupWidget();
-          }
-        } else {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: Colors.teal,
-            ),
-          );
-        }
-      },
-    );
-  }
-
-  noGroupWidget() {
+  noChatsWidget() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: Column(
@@ -337,10 +238,10 @@ class _HomePageState extends State<HomePage> {
         children: [
           GestureDetector(
             onTap: () {
-              popUpDialog(context);
+              nextScreen(context, const SearchPersonPage());
             },
             child: Icon(
-              Icons.add_circle,
+              Icons.search_outlined,
               color: Colors.grey[700],
               size: 75,
             ),
@@ -349,7 +250,7 @@ class _HomePageState extends State<HomePage> {
             height: 15,
           ),
           const Text(
-              "You do not have any groups yet. Tap the add icon to create a group.",
+              "You do not have any conversations yet. Search for a user to start chatting!",
               textAlign: TextAlign.center),
         ],
       ),
