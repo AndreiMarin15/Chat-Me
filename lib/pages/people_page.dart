@@ -1,6 +1,5 @@
 import 'package:chatapp_firebase/pages/home_page.dart';
 import 'package:chatapp_firebase/pages/profile_page.dart';
-import 'package:chatapp_firebase/pages/search_page.dart';
 import 'package:chatapp_firebase/pages/search_person_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +23,6 @@ class _PeoplePageState extends State<PeoplePage> {
   String email = "";
   AuthService auth = AuthService();
   Stream? people;
-  bool _isLoading = false;
   String groupName = "";
   final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
