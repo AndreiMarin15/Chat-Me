@@ -34,9 +34,20 @@ class Database {
   }
 
   // getting conversations
-  getUserConversations() async {
+  Future<CollectionReference<Object?>> getUserConversations(String? id) async {
+    CollectionReference conversations;
+    if (id == null) {
+      conversations = users.doc(uid).collection("conversations");
+      return conversations;
+    } else {
+      conversations = users.doc(id).collection("conversations");
+      return conversations;
+    }
+  }
+
+  getConversationCollection(String id) async {
     CollectionReference conversations =
-        users.doc(uid).collection("conversations");
+        users.doc(id).collection("conversations");
 
     return conversations;
   }
@@ -69,10 +80,70 @@ class Database {
     });
   }
 
+   newConversation(
+      String partnerName,
+      String partnerId,
+      String partnerEmail,
+      String userId,
+      String userName,
+      String userEmail) async {
+    var data = {
+      // initial data of the person to be created
+      "conversationWith": partnerName,
+      "groupIcon": "",
+      "partnerId": partnerId,
+      "partnerEmail": partnerEmail,
+      "messages": [],
+      "recentMessage": "",
+      "recentMessageSender": "",
+    };
+
+    var data2 = {
+      // initial data of the partner to be created
+      "conversationWith": userName,
+      "groupIcon": "",
+      "partnerId": userId,
+      "partnerEmail": userEmail,
+      "messages": [],
+      "recentMessage": "",
+      "recentMessageSender": "",
+    };
+
+    CollectionReference userConvoRef = getConversationCollection(userId);
+    DocumentReference userConvoDocRef = userConvoRef.doc(partnerId);
+
+    await userConvoDocRef.set(data);
+
+    CollectionReference partnerConvoRef = getConversationCollection(partnerId);
+    DocumentReference partnerConvoDocRef = partnerConvoRef.doc(userId);
+
+    await partnerConvoDocRef.set(data2);
+  }
+
+  Future<bool> chatExists(String uid, String personId) async {
+    CollectionReference conversations =
+        getConversations(uid);
+    // QuerySnapshot snap = await
+
+    DocumentSnapshot person = await conversations.doc(personId).get();
+
+    return person.exists;
+  }
+
   // Getting the chat
   getChats(String groupId) async {
     return groups
         .doc(groupId)
+        .collection("messages")
+        .orderBy("time")
+        .snapshots();
+  }
+
+  getConversations(String convoId) async {
+    return users
+        .doc(uid)
+        .collection("conversations")
+        .doc(convoId)
         .collection("messages")
         .orderBy("time")
         .snapshots();
@@ -138,4 +209,26 @@ class Database {
       return false;
     }
   }
+
+  // andrei
+  Future startConversation(String userName, String personId, String personName,
+      String personEmail, String userEmail) async {
+    DocumentReference userDocRef = users.doc(uid);
+
+    DocumentReference personDocRef = users.doc(personId);
+
+    DocumentReference convoDocRef = await newConversation(
+        personName, personId, personEmail, userName, uid!, userEmail);
+
+    await userDocRef.update({
+      'conversations': FieldValue.arrayUnion(["${convoDocRef.id}_$personName"])
+    });
+
+    await personDocRef.update({
+      'conversations': FieldValue.arrayUnion(["${convoDocRef.id}_$userName"])
+    });
+  }
+
+  // criscela
+  toggleGroupJoin(String userName, String groupId, String groupName) async {}
 }

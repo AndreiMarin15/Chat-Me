@@ -220,6 +220,7 @@ class _HomePageState extends State<HomePage> {
                   "Create a Group",
                   textAlign: TextAlign.left,
                 ),
+                
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

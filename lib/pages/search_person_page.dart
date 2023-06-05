@@ -1,8 +1,13 @@
 import 'package:chatapp_firebase/helper/helper_function.dart';
+import 'package:chatapp_firebase/pages/chat_page.dart';
 import 'package:chatapp_firebase/service/db_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import '../widgets/widgets.dart';
+import 'chat_person_page.dart';
 
 class SearchPersonPage extends StatefulWidget {
   const SearchPersonPage({super.key});
@@ -17,16 +22,19 @@ class _SearchPersonPageState extends State<SearchPersonPage> {
   // QuerySnapshot? searchSnapshot;
   bool _searchStarted = false;
   String userName = "";
+  String userEmail = "";
   User user = FirebaseAuth.instance.currentUser!;
 
   List _allResults = [];
   List _resultList = [];
 
+  List conversations = [];
+
   @override
   void initState() {
     super.initState();
     getCurrentUserIdandName();
-
+    getClientConvos();
     searchController.addListener(onSearchChanged);
   }
 
@@ -77,6 +85,16 @@ class _SearchPersonPageState extends State<SearchPersonPage> {
     searchResultList();
   }
 
+  getClientConvos() async {
+    await Database().getUserConversations(user.uid).then((value) {
+      value.get().then((values) {
+        setState(() {
+          conversations = values.docs;
+        });
+      });
+    });
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -97,6 +115,14 @@ class _SearchPersonPageState extends State<SearchPersonPage> {
     await HelperFunctions.getUserName().then((value) {
       setState(() {
         userName = value!;
+      });
+    });
+  }
+
+  getCurrentUserEmail() async {
+    await HelperFunctions.getEmail().then((value) {
+      setState(() {
+        userEmail = value!;
       });
     });
   }
@@ -158,36 +184,63 @@ class _SearchPersonPageState extends State<SearchPersonPage> {
         : Container();
   }
 
-  Widget peopleTile(String userName, String personId, String name, String email,
-      List<dynamic> convo) {
-    bool isJoined = convo.contains("${user.uid}_$userName");
+  Widget peopleTile(String userName, String personId, String personName,
+      String personEmail, List<dynamic> convo) {
+    bool isStarted = false;
+    for (var convos in conversations) {
+      String convoId = HelperFunctions.getId(convos);
+      String toCompare = "${convoId}_$personName";
 
+      if (convo.contains(toCompare)) {
+        setState(() {
+          isStarted = true;
+        });
+      }
+    }
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       leading: CircleAvatar(
         radius: 30,
         backgroundColor: Colors.teal[700],
         child: Text(
-          name.substring(0, 1).toUpperCase(),
+          personName.substring(0, 1).toUpperCase(),
           style: const TextStyle(color: Colors.white),
         ),
       ),
       title: Text(
-        name,
+        personName,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
-      subtitle: Text("Email: $email"),
+      subtitle: Text("email: $personEmail"),
       trailing: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return InkWell(
-            onTap: () {
-              setState(() {
-                isJoined = !isJoined;
-              });
-
-              print("Flutter: ${isJoined.toString()}");
+            onTap: () async {
+              if (!isStarted) {
+                //           await Database(uid: user.uid).startConversation(
+                //               userName, personId, personName, personEmail, userEmail);
+                nextScreen(
+                    context,
+                    ChatPersonPage(
+                      personId: personId,
+                      personName: personName,
+                      personEmail: personEmail,
+                      userName: userName,
+                      userEmail: userEmail
+                    ));
+              } else {
+                nextScreen(
+                    context,
+                    ChatPersonPage(
+                      personId: personId,
+                      personName: personName,
+                      personEmail: personEmail,
+                      userName: userName,
+                      userEmail: userEmail
+                    ));
+              }
             },
-            child: isJoined
+            child: isStarted
                 ? Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),

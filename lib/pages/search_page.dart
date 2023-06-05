@@ -176,11 +176,11 @@ class _SearchPageState extends State<SearchPage> {
       trailing: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return InkWell(
-            onTap: () {
+            onTap: () async {
               setState(() {
                 isJoined = !isJoined;
               });
-
+              await Database(uid: user.uid).toggleGroupJoin(userName, groupId, groupName);
               print("Flutter: ${isJoined.toString()}");
             },
             child: isJoined
