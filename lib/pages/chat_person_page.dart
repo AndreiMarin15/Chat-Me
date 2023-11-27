@@ -98,4 +98,8 @@ class _ChatPersonPageState extends State<ChatPersonPage> {
       ),
     );
   }
+
+  hello() {
+    debugPrint("HELLO");
+  }
 }

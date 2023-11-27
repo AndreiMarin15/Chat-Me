@@ -181,7 +181,7 @@ class _SearchPageState extends State<SearchPage> {
                 isJoined = !isJoined;
               });
               await Database(uid: user.uid).toggleGroupJoin(userName, groupId, groupName);
-              print("Flutter: ${isJoined.toString()}");
+              
             },
             child: isJoined
                 ? Container(

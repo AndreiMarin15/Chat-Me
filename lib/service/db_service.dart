@@ -63,6 +63,7 @@ class Database {
       "groupId": "",
       "recentMessage": "",
       "recentMessageSender": "",
+      "recentMessageTime": ""
     };
     DocumentReference docRef =
         await groups.add(data); // creates the group itself
@@ -80,13 +81,8 @@ class Database {
     });
   }
 
-   newConversation(
-      String partnerName,
-      String partnerId,
-      String partnerEmail,
-      String userId,
-      String userName,
-      String userEmail) async {
+  newConversation(String partnerName, String partnerId, String partnerEmail,
+      String userId, String userName, String userEmail) async {
     var data = {
       // initial data of the person to be created
       "conversationWith": partnerName,
@@ -96,6 +92,7 @@ class Database {
       "messages": [],
       "recentMessage": "",
       "recentMessageSender": "",
+      "recentMessageTime": ""
     };
 
     var data2 = {
@@ -107,6 +104,7 @@ class Database {
       "messages": [],
       "recentMessage": "",
       "recentMessageSender": "",
+      "recentMessageTime": ""
     };
 
     CollectionReference userConvoRef = getConversationCollection(userId);
@@ -121,8 +119,7 @@ class Database {
   }
 
   Future<bool> chatExists(String uid, String personId) async {
-    CollectionReference conversations =
-        getConversations(uid);
+    CollectionReference conversations = getConversations(uid);
     // QuerySnapshot snap = await
 
     DocumentSnapshot person = await conversations.doc(personId).get();
@@ -230,5 +227,39 @@ class Database {
   }
 
   // criscela
-  toggleGroupJoin(String userName, String groupId, String groupName) async {}
+  Future toggleGroupJoin(
+      String userName, String groupId, String groupName) async {
+    DocumentReference userDocRef = users.doc(uid);
+    DocumentReference groupDocRef = groups.doc(groupId);
+
+    DocumentSnapshot docSnap = await userDocRef.get();
+    List<dynamic> group = await docSnap['groups'];
+
+    if (group.contains("${groupId}_$groupName")) {
+      await userDocRef.update({
+        'groups': FieldValue.arrayRemove(["${groupId}_$groupName"])
+      });
+
+      await groupDocRef.update({
+        'members': FieldValue.arrayRemove(["${uid}_$userName"])
+      });
+    } else {
+      await userDocRef.update({
+        'groups': FieldValue.arrayUnion(["${groupId}_$groupName"])
+      });
+
+      await groupDocRef.update({
+        'members': FieldValue.arrayUnion(["${uid}_$userName"])
+      });
+    }
+  }
+
+  sendMessage(String groupId, Map<String, dynamic> chatMessageData) async {
+    groups.doc(groupId).collection('messages').add(chatMessageData);
+    groups.doc(groupId).update({
+      'recentMessage': chatMessageData['message'],
+      'recentMessageSender': chatMessageData['sender'],
+      'recentMessageTime': chatMessageData['time'].toString()
+    });
+  }
 }
